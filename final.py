@@ -10,6 +10,7 @@ Author: Tim Hannifan
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import os
+import sys
 import numpy as np
 import pandas as pd
 
@@ -28,38 +29,40 @@ from tabulate import tabulate
 import matplotlib.pyplot as plt
 
 
-# Import data result from batch.py. The default is a .001% of total data available in the full dataset.
-data_path = './data'
-filename = 'twosides-mini.csv'
-df = pd.read_csv(
-    os.path.join(data_path, filename),
-    usecols=['joint_drug_name', 'condition_concept_name', 'PRR'],
-    low_memory=False)
 
-# Create reader object with correct scale
-reader = Reader(rating_scale=(min(df["PRR"]), max(df["PRR"])))
-# The columns correspond to drug_names, reaction and PRR (in that order).
-data = Dataset.load_from_df(df[['joint_drug_name', 'condition_concept_name', 'PRR']], reader)
+def run(filename):
 
-# Define param grid for each algorithm
-pg_svd = {'n_factors': [10, 20, 50], 'n_epochs': [10, 20],
-            'lr_all': [0.002, 0.005], 'reg_all': [0.2, 0.4]}
-pg_svd_pp = {'n_factors': [10, 20, 50], 'n_epochs': [10, 20],
+    # Import data result from batch.py. The default is a .001% of total data available in the full dataset.
+    data_path = './data'
+    df = pd.read_csv(
+        os.path.join(data_path, filename),
+        usecols=['joint_drug_name', 'condition_concept_name', 'PRR'],
+        low_memory=False)
+
+    # Create reader object with correct scale
+    reader = Reader(rating_scale=(min(df["PRR"]), max(df["PRR"])))
+    # The columns correspond to drug_names, reaction and PRR (in that order).
+    data = Dataset.load_from_df(df[['joint_drug_name', 'condition_concept_name', 'PRR']], reader)
+
+    # Define param grid for each algorithm
+    pg_svd = {'n_factors': [10, 20, 50], 'n_epochs': [10, 20],
                 'lr_all': [0.002, 0.005], 'reg_all': [0.2, 0.4]}
-pg_svd_nmf = {'n_factors': [10, 20, 50], 'n_epochs': [10, 20],
-                'biased': [True, False]}
+    pg_svd_pp = {'n_factors': [10, 20, 50], 'n_epochs': [10, 20],
+                    'lr_all': [0.002, 0.005], 'reg_all': [0.2, 0.4]}
+    pg_svd_nmf = {'n_factors': [10, 20, 50], 'n_epochs': [10, 20],
+                    'biased': [True, False]}
 
-for model_grid in [(BaselineOnly, {}),(SVD, pg_svd), (SVDpp, pg_svd_pp), (NMF, pg_svd_nmf)]:
+    for model_grid in [(BaselineOnly, {}),(SVD, pg_svd), (SVDpp, pg_svd_pp), (NMF, pg_svd_nmf)]:
 
-    model, param_grid = model_grid
-    print('\nStarting new model--------------------', model)
-    gs = GridSearchCV(model, param_grid, measures=['rmse'], cv=5)
-    gs.fit(data)
+        model, param_grid = model_grid
+        print('\nStarting new model--------------------', model)
+        gs = GridSearchCV(model, param_grid, measures=['rmse'], cv=5)
+        gs.fit(data)
 
-    # Best score `
-    print('Lowest RMS achieved: {}'.format(gs.best_score['rmse']))
-    # combination of parameters that gave the best RMSE score
-    print('Best parameters combination: {}'.format(gs.best_params['rmse']))
+        # Best score `
+        print('Lowest RMS achieved: {}'.format(gs.best_score['rmse']))
+        # combination of parameters that gave the best RMSE score
+        print('Best parameters combination: {}'.format(gs.best_params['rmse']))
 
 
 # TODO: implement table output for Latex using gridsearch results
@@ -81,5 +84,9 @@ for model_grid in [(BaselineOnly, {}),(SVD, pg_svd), (SVDpp, pg_svd_pp), (NMF, p
 
 # print(tabulate(table, colstokeep, tablefmt="latex"))
 
-
+if __name__ == '__main__':
+    default_file = 'twosides-mini.csv'
+    if len(sys.argv) > 1:
+        default_file = sys.argv[1]
+    run(default_file)
 
