@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 
 # Import data result from batch.py. The default is a .001% of total data available in the full dataset.
-data_path = './'
+data_path = './data'
 filename = 'twosides-mini.csv'
 df = pd.read_csv(
     os.path.join(data_path, filename),
