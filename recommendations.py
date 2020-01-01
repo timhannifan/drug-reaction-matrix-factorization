@@ -17,7 +17,7 @@ from helpers import get_top_n
 
 # Import data result from batch.py. The default is a .001% of total data available in the full dataset.
 
-DEFAULT_DATA_PATH = './data/tiny.csv'
+DEFAULT_DATA_PATH = './data/twosides-sm.csv'
 
 def run(args):
 
