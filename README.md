@@ -15,11 +15,12 @@ source env/bin/activate
 The main script is contained in `final.py`. To run on the default mini-batch of data, run the following command in the terminal:
 ```
 (env) > python3 final.py
+(env) > python3 recommendations.py './data/twosides-md.csv'
 ```
 
 To run a different size of the data, run the same command using the filename as the first argument. Two files have been included for testing in the `/data` directory.
 ```
-(env) > python3 final.py twoside-1pct.csv
+(env) > python3 final.py './data/twosides-lg.csv'
 ```
 
 ## Output
